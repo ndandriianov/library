@@ -6,7 +6,6 @@ import (
 	"library/http/dto"
 	"library/library"
 	"net/http"
-	"time"
 )
 
 type Handlers struct {
@@ -15,37 +14,25 @@ type Handlers struct {
 
 func (h *Handlers) HandleAddBook(w http.ResponseWriter, r *http.Request) {
 	var bookDTO dto.Book
-	if err := json.NewDecoder(r.Body).Decode(bookDTO); err != nil {
-		errDTO := dto.Err{
-			Message: err.Error(),
-			Time:    time.Now(),
-		}
-
-		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&bookDTO); err != nil {
+		writeError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	book, err := library.NewBook(bookDTO.Title, bookDTO.Author, bookDTO.NumberOfPages)
 	if err != nil {
-		errDTO := dto.Err{
-			Message: err.Error(),
-			Time:    time.Now(),
-		}
-
-		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		writeError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	h.lib.AddBook(book)
+	if err := h.lib.AddBook(book); err != nil {
+		writeError(w, err, http.StatusConflict)
+		return
+	}
 
 	b, err := json.MarshalIndent(book, "", "\t")
 	if err != nil {
-		errDTO := dto.Err{
-			Message: err.Error(),
-			Time:    time.Now(),
-		}
-
-		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+		writeError(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -53,7 +40,3 @@ func (h *Handlers) HandleAddBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("failed to write http response")
 	}
 }
-
-//func (h *Handlers) WriteError(w http.ResponseWriter, err error, rules map[error]int) {
-//
-//}

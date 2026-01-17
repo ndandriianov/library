@@ -11,6 +11,8 @@ type Library struct {
 }
 
 // AddBook adds the provided book to the library.
+//
+// It returns ErrBookAlreadyExists if the book already exists.
 func (l *Library) AddBook(book Book) error {
 	l.mtx.Lock()
 	defer l.mtx.Unlock()
