@@ -2,9 +2,9 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"library/http/dto"
 	"library/library"
+	"log"
 	"net/http"
 	"time"
 )
@@ -63,11 +63,8 @@ func (h *Handlers) HandleAddBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := w.Write(b); err != nil {
-		// Log error but don't return error response as headers are already sent
-		errDTO := dto.Err{
-			Message: fmt.Sprintf("failed to write http response: %v", err),
-			Time:    time.Now(),
-		}
-		fmt.Fprintf(w, "%s\n", errDTO.ToString())
+		// Log error to server logs since headers are already sent
+		// Cannot return error response to client at this point
+		log.Printf("failed to write http response: %v", err)
 	}
 }
