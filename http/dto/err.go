@@ -12,7 +12,7 @@ type Err struct {
 }
 
 func (e *Err) ToString() string {
-	str, err := json.MarshalIndent(e, "", "\n")
+	str, err := json.Marshal(e)
 	if err != nil {
 		msg := "failed to marshall Err"
 		fmt.Println(msg)

@@ -2,10 +2,13 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"library/http/dto"
 	"library/library"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Handlers struct {
@@ -30,7 +33,36 @@ func (h *Handlers) HandleAddBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := json.MarshalIndent(book, "", "\t")
+	b, err := json.Marshal(book)
+	if err != nil {
+		writeError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := w.Write(b); err != nil {
+		fmt.Println("failed to write http response")
+	}
+}
+
+func (h *Handlers) HandleFinishBook(w http.ResponseWriter, r *http.Request) {
+	title := mux.Vars(r)["title"]
+
+	book, err := h.lib.FinishBook(title)
+	if err != nil {
+		var status int
+		switch {
+		case errors.Is(err, library.ErrBookNotFound):
+			status = http.StatusNotFound
+		case errors.Is(err, library.ErrBookIsAlreadyFinished):
+			status = http.StatusConflict
+		default:
+			status = http.StatusInternalServerError
+		}
+		writeError(w, err, status)
+		return
+	}
+
+	b, err := json.Marshal(book)
 	if err != nil {
 		writeError(w, err, http.StatusInternalServerError)
 		return
