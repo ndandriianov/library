@@ -39,8 +39,9 @@ func (l *Library) FinishBook(title string) (Book, error) {
 		return Book{}, ErrBookIsAlreadyFinished
 	}
 
+	now := time.Now()
 	book.IsFinished = true
-	book.FinishTime = time.Now()
+	book.FinishTime = &now
 	l.books[title] = book
 
 	return book, nil
