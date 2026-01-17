@@ -14,9 +14,12 @@ type Err struct {
 func (e *Err) ToString() string {
 	str, err := json.MarshalIndent(e, "", "\n")
 	if err != nil {
-		msg := "failed to marshall Err"
-		fmt.Println(msg)
-		return msg
+		// If marshaling fails, return a simple error message
+		// This prevents error handling from failing silently
+		return fmt.Sprintf(`{
+"Message": "failed to marshal error: %v",
+"Time": "%s"
+}`, err, e.Time.Format(time.RFC3339))
 	}
 
 	return string(str)
