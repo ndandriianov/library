@@ -1,4 +1,4 @@
-module library
+module LibraryManager
 
 go 1.25
 

@@ -10,6 +10,12 @@ type Library struct {
 	mtx   sync.RWMutex
 }
 
+func NewLibrary() Library {
+	return Library{
+		books: make(map[string]Book),
+	}
+}
+
 // AddBook adds the provided book to the library.
 //
 // It returns ErrBookAlreadyExists if the book already exists.

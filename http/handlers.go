@@ -1,10 +1,10 @@
 package http
 
 import (
+	"LibraryManager/http/dto"
+	"LibraryManager/library"
 	"encoding/json"
 	"errors"
-	"library/http/dto"
-	"library/library"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,6 +12,10 @@ import (
 
 type Handlers struct {
 	lib *library.Library
+}
+
+func NewHandlers(lib *library.Library) *Handlers {
+	return &Handlers{lib: lib}
 }
 
 func (h *Handlers) HandleAddBook(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +36,7 @@ func (h *Handlers) HandleAddBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(book); err != nil {
 		logFailedWriteHTTPResponse(err)
 		return
