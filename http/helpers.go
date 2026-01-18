@@ -20,3 +20,7 @@ func writeError(w http.ResponseWriter, currentError error, status int) {
 		fmt.Println("failed to write http response")
 	}
 }
+
+func logFailedWriteHTTPResponse(err error) {
+	fmt.Println("failed to write HTTP response", err)
+}

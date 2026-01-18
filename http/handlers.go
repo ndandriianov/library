@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"library/http/dto"
 	"library/library"
 	"net/http"
@@ -33,14 +32,9 @@ func (h *Handlers) HandleAddBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := json.Marshal(book)
-	if err != nil {
-		writeError(w, err, http.StatusInternalServerError)
+	if err := json.NewEncoder(w).Encode(book); err != nil {
+		logFailedWriteHTTPResponse(err)
 		return
-	}
-
-	if _, err := w.Write(b); err != nil {
-		fmt.Println("failed to write http response")
 	}
 }
 
@@ -62,13 +56,46 @@ func (h *Handlers) HandleFinishBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := json.Marshal(book)
+	if err := json.NewEncoder(w).Encode(book); err != nil {
+		logFailedWriteHTTPResponse(err)
+		return
+	}
+}
+
+func (h *Handlers) HandleGetBook(w http.ResponseWriter, r *http.Request) {
+	title := mux.Vars(r)["title"]
+
+	book, err := h.lib.GetBook(title)
 	if err != nil {
-		writeError(w, err, http.StatusInternalServerError)
+		writeError(w, err, http.StatusNotFound)
 		return
 	}
 
-	if _, err := w.Write(b); err != nil {
-		fmt.Println("failed to write http response")
+	if err := json.NewEncoder(w).Encode(book); err != nil {
+		logFailedWriteHTTPResponse(err)
+		return
+	}
+}
+
+func (h *Handlers) HandleGetBooks(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+
+	author := q.Get("author")
+	isFinishedStr := q.Get("isFinished")
+
+	var isFinished *bool
+	if isFinishedStr == "true" {
+		tmp := true
+		isFinished = &tmp
+	} else if isFinishedStr == "false" {
+		tmp := false
+		isFinished = &tmp
+	}
+
+	books := h.lib.GetBooks(author, isFinished)
+	err := json.NewEncoder(w).Encode(books)
+	if err != nil {
+		logFailedWriteHTTPResponse(err)
+		return
 	}
 }
