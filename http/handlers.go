@@ -99,3 +99,19 @@ func (h *Handlers) HandleGetBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (h *Handlers) HandleDeleteBook(w http.ResponseWriter, r *http.Request) {
+	title := mux.Vars(r)["title"]
+
+	if err := h.lib.DeleteBook(title); err != nil {
+		switch {
+		case errors.Is(err, library.ErrBookNotFound):
+			writeError(w, err, http.StatusNotFound)
+		default:
+			writeError(w, err, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

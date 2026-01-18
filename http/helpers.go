@@ -15,9 +15,9 @@ func writeError(w http.ResponseWriter, currentError error, status int) {
 		Time:    time.Now(),
 	}
 
-	_, err := w.Write([]byte(errDTO.ToString()))
-	if err != nil {
-		fmt.Println("failed to write http response")
+	if _, err := w.Write([]byte(errDTO.ToString())); err != nil {
+		logFailedWriteHTTPResponse(err)
+		return
 	}
 }
 
