@@ -18,6 +18,8 @@ func NewServer(handlers *Handlers) *Server {
 func (s Server) Serve() error {
 	router := mux.NewRouter()
 
+	router.Use(JsonMiddleware)
+
 	router.Path("/books").Methods("POST").HandlerFunc(s.handlers.HandleAddBook)
 	router.Path("/books/{title}/finish").Methods("PATCH").HandlerFunc(s.handlers.HandleFinishBook)
 	router.Path("/books/{title}").Methods("GET").HandlerFunc(s.handlers.HandleGetBook)
